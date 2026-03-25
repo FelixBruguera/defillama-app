@@ -194,9 +194,9 @@ function buildSeries({
 		}
 
 		if (chart.isTBD) {
-			base.itemStyle = { ...base.itemStyle, opacity: 0.15 }
+			base.itemStyle = { ...base.itemStyle, opacity: 0.1 }
 			if (base.areaStyle) {
-				base.areaStyle = { ...base.areaStyle, opacity: 0.15 }
+				base.areaStyle = { ...base.areaStyle, opacity: 0.1 }
 			}
 			base.lineStyle = { ...(base.lineStyle ?? {}), type: 'dashed', width: 1.5 }
 		}
