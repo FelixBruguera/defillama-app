@@ -5,6 +5,7 @@ const WHITESPACE = /\s+/g
 const INVALID_CHARS = /[^\w.!&-]/g
 
 export function tokenIconUrl(name: string, size: number = 48): string {
+	if (!name) return `${ICONS_CDN}/protocols/?w=${size}&h=${size}`
 	const slug = name
 		.trim()
 		.toLowerCase()
