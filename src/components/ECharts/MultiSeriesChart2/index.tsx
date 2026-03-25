@@ -194,7 +194,7 @@ function buildSeries({
 		}
 
 		if (chart.isTBD) {
-			base.itemStyle = { ...base.itemStyle, opacity: 0.1 }
+			base.itemStyle = { ...base.itemStyle, opacity: 0.2 }
 			if (base.areaStyle) {
 				base.areaStyle = { ...base.areaStyle, opacity: 0.1 }
 			}
