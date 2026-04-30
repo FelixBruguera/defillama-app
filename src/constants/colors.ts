@@ -41,3 +41,18 @@ export const CHART_COLORS = [
 	'#D2B48C', // Tan
 	'#FF4500' // Orange Red
 ]
+
+export const CHAIN_COLORS: Record<string, string> = {
+	ethereum: '#627EEA',
+	bsc: '#f0b90b',
+	arbitrum: '#016BE5',
+	'op-mainnet': '#FF0421',
+	base: '#0000ff',
+	polygon: '#6100FF',
+	solana: '#9945FF',
+	avalanche: '#FF394A',
+	plasma: '#162F29',
+	'hyperliquid-l1': '#50E3C2',
+	monad: '#6E54FF',
+	sui: '#4DA2FF'
+}
