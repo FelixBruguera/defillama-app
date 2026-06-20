@@ -243,9 +243,26 @@ const positionColumns = [
 		id: 'collateral',
 		header: 'Token',
 		enableSorting: false,
+		cell: ({ row, getValue }) => {
+			const collateral = getValue()
+			if (!collateral) return null
+			const { collateralLogo, collateralRoute } = row.original
+			return (
+				<span className="flex items-center gap-2">
+					{collateralLogo ? <TokenLogo src={collateralLogo} data-lgonly alt={`Logo of ${collateral}`} /> : null}
+					{collateralRoute ? (
+						<BasicLink href={collateralRoute} className="text-(--link-text) hover:underline">
+							{collateral}
+						</BasicLink>
+					) : (
+						<span>{collateral}</span>
+					)}
+				</span>
+			)
+		},
 		meta: {
-			headerClassName: 'w-[80px]',
-			align: 'end'
+			headerClassName: 'w-[120px]',
+			align: 'start'
 		}
 	}),
 	positionColumnHelper.accessor((row) => row.collateralAmountUsd ?? undefined, {

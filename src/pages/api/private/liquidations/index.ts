@@ -16,7 +16,8 @@ export default withSubscriptionJsonRoute({
 		])
 		const data = await getLiquidationsOverviewPageData({
 			chainMetadata: metadataCache.chainMetadata,
-			protocolMetadata: metadataCache.protocolMetadata
+			protocolMetadata: metadataCache.protocolMetadata,
+			tokenDirectory: metadataCache.tokenDirectory
 		})
 
 		return res.status(200).json(data)

@@ -28,7 +28,8 @@ export default withSubscriptionJsonRoute<{ symbol: string }>({
 
 		const metadataCache = {
 			chainMetadata: metadataModule.default.chainMetadata,
-			protocolMetadata: metadataModule.default.protocolMetadata
+			protocolMetadata: metadataModule.default.protocolMetadata,
+			tokenDirectory: metadataModule.default.tokenDirectory
 		}
 		const { getTokenLiquidationsSectionData } = await import('~/containers/LiquidationsV2/server/dataset')
 		const data = await getTokenLiquidationsSectionData(normalizedSymbol, metadataCache)

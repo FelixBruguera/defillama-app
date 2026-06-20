@@ -4,6 +4,8 @@ import { slug } from '~/utils'
 import { findBlockExplorerChain } from '~/utils/blockExplorers'
 import { normalizeLiquidationsTokenSymbol } from '~/utils/metadata/liquidations'
 import type { IChainMetadata, IProtocolMetadata } from '~/utils/metadata/types'
+import { getCanonicalTokenRoute } from '~/utils/tokenDirectory'
+import type { TokenDirectory } from '~/utils/tokenDirectory'
 import { fetchAllLiquidations, fetchProtocolLiquidations, fetchProtocolsList } from './api'
 import type {
 	LiquidationsDistributionChartData,
@@ -30,6 +32,7 @@ import { createProtocolMetadataLookup } from './protocolMetadata'
 export interface LiquidationsMetadataCache {
 	chainMetadata: Record<string, IChainMetadata>
 	protocolMetadata: Record<string, IProtocolMetadata>
+	tokenDirectory: TokenDirectory
 }
 
 type LiquidationsProtocolMetadata = IProtocolMetadata & { name?: string }
@@ -141,26 +144,41 @@ function getChainLinksFromRefs(protocol: LiquidationsProtocolRef, chainRefs: Liq
 	]
 }
 
+function resolveCollateralTokenInfo(
+	collateral: string,
+	metadataCache: LiquidationsMetadataCache
+): { logo: string | null; route: string | null } {
+	const record = metadataCache.tokenDirectory[slug(collateral)] ?? null
+	if (!record) return { logo: null, route: null }
+	return { logo: record.logo ?? null, route: getCanonicalTokenRoute(record) }
+}
+
 function normalizePositions(
 	protocol: LiquidationsProtocolRef,
 	chain: LiquidationsChainRef,
-	rawPositions: RawLiquidationPosition[]
+	rawPositions: RawLiquidationPosition[],
+	metadataCache: LiquidationsMetadataCache
 ): LiquidationPosition[] {
-	return rawPositions.map((position) => ({
-		protocolId: protocol.id,
-		protocolName: protocol.name,
-		protocolSlug: protocol.slug,
-		chainId: chain.id,
-		chainName: chain.name,
-		chainSlug: chain.slug,
-		owner: position.owner,
-		ownerName: position.extra?.displayName ?? position.owner,
-		ownerUrlOverride: position.extra?.url ?? null,
-		liqPrice: position.liqPrice,
-		collateral: position.collateral,
-		collateralAmount: position.collateralAmount,
-		collateralAmountUsd: position.collateralAmountUsd
-	}))
+	return rawPositions.map((position) => {
+		const tokenInfo = resolveCollateralTokenInfo(position.collateral, metadataCache)
+		return {
+			protocolId: protocol.id,
+			protocolName: protocol.name,
+			protocolSlug: protocol.slug,
+			chainId: chain.id,
+			chainName: chain.name,
+			chainSlug: chain.slug,
+			owner: position.owner,
+			ownerName: position.extra?.displayName ?? position.owner,
+			ownerUrlOverride: position.extra?.url ?? null,
+			liqPrice: position.liqPrice,
+			collateral: position.collateral,
+			collateralLogo: tokenInfo.logo,
+			collateralRoute: tokenInfo.route,
+			collateralAmount: position.collateralAmount,
+			collateralAmountUsd: position.collateralAmountUsd
+		}
+	})
 }
 
 function getCollateralCount(positions: Array<{ collateral: string }>): number {
@@ -374,7 +392,7 @@ export function buildLiquidationsOverviewPageData(
 		for (const chainId of protocolChainIds) {
 			const chain = getChainRef(chainId, metadataCache.chainMetadata)
 			const positions = protocolData[chainId]
-			const normalizedChainPositions = normalizePositions(protocol, chain, positions)
+			const normalizedChainPositions = normalizePositions(protocol, chain, positions, metadataCache)
 			const chainCollateralUsd = sumCollateralUsd(positions)
 			chartPositions.push(...normalizedChainPositions)
 			protocolPositionCount += positions.length
@@ -474,7 +492,7 @@ export function buildTokenLiquidationsSectionData(
 			}
 
 			const chain = getChainRef(chainId, metadataCache.chainMetadata)
-			const normalizedPositions = normalizePositions(protocol, chain, matchedPositions)
+			const normalizedPositions = normalizePositions(protocol, chain, matchedPositions, metadataCache)
 			const chainCollateralUsd = sumCollateralUsd(matchedPositions)
 
 			protocolPositionCount += matchedPositions.length
@@ -606,7 +624,7 @@ export function buildLiquidationsProtocolPageData(
 
 	for (const chain of chainRefs) {
 		const rawPositions = protocolData[chain.id]
-		const chainPositions = normalizePositions(protocol, chain, rawPositions)
+		const chainPositions = normalizePositions(protocol, chain, rawPositions, metadataCache)
 		chartPositions.push(...chainPositions)
 		const chainCollateralUsd = sumCollateralUsd(rawPositions)
 		positions.push(...chainPositions)
@@ -661,7 +679,7 @@ export function buildLiquidationsChainPageData(
 		chainMetadata: metadataCache.chainMetadata
 	})
 	const chainPositions = protocolData[chainId] ?? []
-	const positions = normalizePositions(protocol, chain, chainPositions)
+	const positions = normalizePositions(protocol, chain, chainPositions, metadataCache)
 	const chainRows: ProtocolChainRow[] = []
 
 	const sortedChainRefs = chainIds

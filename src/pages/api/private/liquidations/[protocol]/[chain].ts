@@ -30,7 +30,8 @@ export default withSubscriptionJsonRoute<{ protocol: string; chain: string }>({
 		const { getLiquidationsChainPageData } = await import('~/containers/LiquidationsV2/server/dataset')
 		const data = await getLiquidationsChainPageData(route.protocolId, route.chainId, {
 			chainMetadata: route.metadataCache.chainMetadata,
-			protocolMetadata: route.metadataCache.protocolMetadata
+			protocolMetadata: route.metadataCache.protocolMetadata,
+			tokenDirectory: route.metadataCache.tokenDirectory
 		})
 
 		if (!data) {

@@ -39,7 +39,8 @@ const metadata = {
 		arbitrum: { id: 'arbitrum', name: 'Arbitrum One' },
 		ethereum: { id: 'ethereum', name: 'Ethereum' },
 		base: { id: 'base', name: 'Base' }
-	}
+	},
+	tokenDirectory: {}
 }
 
 beforeEach(() => {
@@ -192,9 +193,50 @@ describe('LiquidationsV2 queries', () => {
 			ownerUrlOverride: 'https://example.com/1',
 			liqPrice: 1,
 			collateral: 'ethereum:eth',
+			collateralLogo: null,
+			collateralRoute: null,
 			collateralAmount: 10,
 			collateralAmountUsd: 1000
 		})
+	})
+
+	it('resolves collateral logo and route from the token directory by symbol', async () => {
+		mockedFetchProtocolsList.mockResolvedValue({ protocols: ['maker'] })
+		mockedFetchProtocolLiquidations.mockResolvedValue({
+			timestamp: 200,
+			tokens: {},
+			validThresholds: ['all'],
+			data: {
+				arbitrum: [
+					{ owner: '0x1', liqPrice: 1, collateral: 'WBTC', collateralAmount: 1, collateralAmountUsd: 100 },
+					{ owner: '0x2', liqPrice: 2, collateral: 'UNKNOWNTOKEN', collateralAmount: 1, collateralAmountUsd: 100 }
+				],
+				ethereum: []
+			}
+		})
+
+		const metadataWithTokens = {
+			...metadata,
+			tokenDirectory: {
+				wbtc: {
+					name: 'Wrapped Bitcoin',
+					symbol: 'WBTC',
+					logo: 'https://token-icons.llamao.fi/icons/tokens/gecko/wrapped-bitcoin?w=48&h=48'
+				}
+			}
+		}
+
+		const data = await getLiquidationsProtocolPageData('sky', metadataWithTokens)
+
+		expect(data?.positions[0].collateral).toBe('WBTC')
+		expect(data?.positions[0].collateralLogo).toBe(
+			'https://token-icons.llamao.fi/icons/tokens/gecko/wrapped-bitcoin?w=48&h=48'
+		)
+		expect(data?.positions[0].collateralRoute).toBe('/token/WBTC')
+
+		// Tokens not in the directory fall back to no icon and no link.
+		expect(data?.positions[1].collateralLogo).toBeNull()
+		expect(data?.positions[1].collateralRoute).toBeNull()
 	})
 
 	it('returns null for an invalid protocol', async () => {

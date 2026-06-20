@@ -17,7 +17,9 @@ const basePosition: LiquidationPosition = {
 	liqPrice: 1234,
 	collateral: 'WBTC',
 	collateralAmount: 1.25,
-	collateralAmountUsd: 110000
+	collateralAmountUsd: 110000,
+	collateralLogo: null,
+	collateralRoute: null
 }
 
 describe('LiquidationsOwnerLink', () => {

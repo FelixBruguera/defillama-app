@@ -76,6 +76,8 @@ export interface LiquidationPosition {
 	ownerUrlOverride: string | null
 	liqPrice: number
 	collateral: string
+	collateralLogo: string | null
+	collateralRoute: string | null
 	collateralAmount: number
 	collateralAmountUsd: number
 }

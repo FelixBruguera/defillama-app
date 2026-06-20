@@ -30,7 +30,8 @@ export default withSubscriptionJsonRoute<{ protocol: string }>({
 		])
 		const data = await getLiquidationsProtocolPageData(protocolId, {
 			chainMetadata: metadataCache.chainMetadata,
-			protocolMetadata: metadataCache.protocolMetadata
+			protocolMetadata: metadataCache.protocolMetadata,
+			tokenDirectory: metadataCache.tokenDirectory
 		})
 
 		if (!data) {

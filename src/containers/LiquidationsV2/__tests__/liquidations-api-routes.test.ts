@@ -36,6 +36,8 @@ vi.mock('~/utils/metadata', () => ({
 	default: {
 		chainMetadata: { arbitrum: { name: 'Arbitrum One', id: 'arbitrum' } },
 		protocolMetadata: { sky: { displayName: 'Sky', name: 'sky' } },
+		tokenDirectory: {},
+		tokenDirectoryRecordByRouteSegment: {},
 		liquidationsTokenSymbolsSet: new Set(['WSTETH'])
 	},
 	refreshMetadataIfStale: vi.fn().mockResolvedValue(undefined)
